@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 #!/usr/bin/local/bin/python
 import numpy as np
-from cnn.tools import *
+from tools import *
 class MaxPoolingLayer(object):
     def __init__(self,input_width,input_height,
                  channel_number,filter_width,
@@ -18,6 +18,7 @@ class MaxPoolingLayer(object):
                                       self.output_height,self.output_width))
 
     def forward(self,input_array):
+        self.input_array = input_array
         for d in range(self.channel_number):
             for i in range(self.output_height):
                 for j in range(self.output_width):
@@ -28,13 +29,13 @@ class MaxPoolingLayer(object):
                         self.stride
                     ).max())
 
-    def backward(self,input_array,sensitivity_array):
-        self.delta_array = np.zeros(input_array.shape)
+    def backward(self,sensitivity_array):
+        self.delta_array = np.zeros(self.input_array.shape)
         for d in range(self.channel_number):
             for i in range(self.output_height):
                 for j in range(self.output_width):
                     patch_array = get_patch(
-                        input_array[d],i,j,
+                        self.input_array[d],i,j,
                         self.filter_width,
                         self.filter_height,
                         self.stride
@@ -43,3 +44,5 @@ class MaxPoolingLayer(object):
                     self.delta_array[d,
                                      i*self.stride+k,
                                     j*self.stride+l] = sensitivity_array[d,i,j]
+    def update(self):
+        pass

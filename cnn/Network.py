@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 # Sigmoid激活函数类
-from cnn.fc import *
+from fc import *
 import numpy as np
-from cnn.conv import *
-from cnn.activator import *
-from cnn.pool import *
+from conv import *
+from activator import *
+from pool import *
 import sys
 
 #构造 MNIST手写数字识别的简单CONV网络
@@ -22,7 +22,8 @@ class Network(object):
         self.fcLayer1 = FullConnectedLayer(100,300,0.001,SigmoidActivator())
         self.layers.append(self.fcLayer1)
 
-        self.fcLayer2 = FullConnectedLayer(300,10,0.001)
+        self.fcLayer2 = FullConnectedLayer(300,10,0.001,
+                                           SigmoidActivator())
         self.layers.append(self.fcLayer2)
 
     def predict(self,sample):
@@ -50,13 +51,13 @@ class Network(object):
     def cal_gradient(self,label):
         delta = self.layers[-1].activator.backward(
             self.layers[-1].output) * (self.layers[-1].output)
+
         self.fcLayer2.backward(delta)
         delta = self.fcLayer2.delta
 
 
         self.fcLayer1.backward(delta)
         delta = self.fcLayer1.delta
-
         delta =delta.reshape((1,10,10))
 
         self.poolLayer.backward(delta)
@@ -72,12 +73,11 @@ class Network(object):
     def train(self,labels,data_set,epoch):
         count=0
         for i in range(epoch):
-            print("epoch:%d" %(count))
             count+=1
             for d in range(len(data_set)):
                 temp = np.array(labels[d])
-                l =temp.reshape(len(temp)-1)
+                l =temp.reshape(len(temp),-1)
                 temp = np.array(data_set[d])
-                d = temp.reshape((1.28,28))
+                d = temp.reshape((1, 28, 28))
                 self.train_one_sample(l,d)
 
